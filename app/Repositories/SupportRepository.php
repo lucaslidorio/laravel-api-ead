@@ -2,11 +2,13 @@
 
 namespace App\Repositories;
 
-use App\Models\Module;
 use App\Models\Support;
-use App\Models\User;
+
+use App\Repositories\Trait\RepositoryTrait;
 
 class SupportRepository{
+
+    use RepositoryTrait;
 
     protected $entity;
     public function __construct(Support $model)
@@ -14,8 +16,7 @@ class SupportRepository{
         $this->entity = $model;
     }
 
-    public function getSupports(array $filters = []){
-        
+    public function getSupports(array $filters = []){       
         
 
         return $this->getUserAuth()
@@ -32,6 +33,7 @@ class SupportRepository{
                                         $query->where('description','LIKE', "%{$filter}%" );
                                     }
                                 })
+                                ->orderBy('updated_at')
                                 ->get();
     }
 
@@ -41,19 +43,32 @@ class SupportRepository{
             ->supports()
             ->create([
                 'lesson_id' => $data['lesson'],
-                'description' => $data['description']
+                'description' => $data['description'],
+                'status' => $data['status']
 
            ]);
         return $support;
     }
 
-    private function getUserAuth(){
+    public function createReplyToSupportId(string $supportId, array $data){
+        
+        $user = $this->getUserAuth();
+        
+         return $this->getSupport($supportId)
+            ->replies()
+            ->create([
+                'description' => $data['description'],
+                'user_id' => $user->id,                
 
-        // return auth()->user();
-        return User::first();
+            ]);
+       
     }
 
-    
+    private function getSupport(string $id){
+
+        return $this->entity->findOrFail($id);
+    }
+
 
 
 }

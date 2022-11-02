@@ -25,13 +25,14 @@ class StoreSupport extends FormRequest
      */
     public function rules(Support $support)
     {
-        dd($support->statusOptions);
+        //dd(array_keys($support->statusOptions));
         return [
             'lesson' => ['required', 'exists:lessons,id'],
             'status' => [
                 'required',
-                 Rule::in([array_keys($support->statusOptions)])
+                 Rule::in(array_keys($support->statusOptions))
             ],
+            'description' => ['required', 'min:3', 'max:10000'],
         ];
     }
 }
